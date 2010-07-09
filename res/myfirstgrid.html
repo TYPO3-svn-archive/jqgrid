@@ -1,0 +1,53 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>My First Grid</title>
+ 
+<link rel="stylesheet" type="text/css" media="screen" href="css/ui-darkness/jquery-ui-1.8.1.custom.css" />
+<link rel="stylesheet" type="text/css" media="screen" href="css/ui.jqgrid.css" />
+ 
+<style>
+html, body {
+    margin: 0;
+    padding: 0;
+    font-size: 75%;
+}
+</style>
+ 
+<script src="js/jquery-1.4.2.min.js" type="text/javascript"></script>
+<script src="js/i18n/grid.locale-de.js" type="text/javascript"></script>
+<script src="js/jquery.jqGrid.min.js" type="text/javascript"></script>
+ 
+<script type="text/javascript">
+jQuery(document).ready(function(){ 
+  jQuery("#list").jqGrid({
+    url:'http://digitage.dyndns.org/t3vidofon/typo3conf/ext/jqgrid/res/example2.php',
+    datatype: 'xml',
+    mtype: 'GET',
+    colNames:['Inv No','Date', 'Amount','Tax','Total','Notes'],
+    colModel :[ 
+      {name:'invid', index:'invid', width:30}, 
+      {name:'invdate', index:'invdate', width:60}, 
+      {name:'amount', index:'amount', width:40, align:'right'}, 
+      {name:'tax', index:'tax', width:40, align:'right'}, 
+      {name:'total', index:'total', width:40, align:'right'}, 
+      {name:'note', index:'note', width:300, sortable:false} 
+    ],
+    pager: '#pager',
+    rowNum:10,
+    rowList:[10,20,30],
+    sortname: 'invid',
+    sortorder: 'desc',
+    viewrecords: true,
+    caption: 'My first grid'
+  }); 
+}); 
+</script>
+ 
+</head>
+<body>
+<table id="list"></table> 
+<div id="pager"></div> 
+</body>
+</html>

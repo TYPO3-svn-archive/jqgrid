@@ -1,0 +1,4 @@
+plugin.tx_jqgrid_pi1{
+  #cat=jqgrid/int/b; type=int ; label=Pagetype:Enter pagetype for ajax callback here.
+  pagetype = 100
+}

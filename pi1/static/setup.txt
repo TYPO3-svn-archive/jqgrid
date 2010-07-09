@@ -1,0 +1,69 @@
+### AJAX callback function ###
+tx_jqgrid_pi1 = PAGE
+tx_jqgrid_pi1 {
+  config {
+    disableAllHeaderCode = 1
+    additionalHeaders = Content-type:text/xml
+    no_cache = 1
+    xhtml_cleaning = 0
+  }
+  typeNum = {$plugin.tx_jqgrid_pi1.pagetype}
+  10 = USER
+  10 = < plugin.tx_jqgrid_pi1
+  10.userFunc = tx_jqgrid_pi1->ajax
+}
+
+### plugin demo configuration ###
+# => http://www.trirand.com/jqgridwiki/doku.php?id=wiki:options
+# => http://www.trirand.com/jqgridwiki/doku.php?id=wiki:colmodel_options
+plugin.tx_jqgrid_pi1{
+  pages{
+    table = pages
+    typeNum = {$plugin.tx_jqgrid_pi1.pagetype}
+    rowNum = 10
+    rowList = 10,20,30
+    sortname = uid
+    sortorder = asc
+    viewrecords = true
+    caption = Seiten in dieser Typo3-Installation:
+    autowidth = true
+    height = auto
+    columns{
+      
+      1.label = UID
+      1.name = uid
+      1.index = uid
+      1.width = 40
+      
+      2.label = Title
+      2.name = title
+      2.index = title
+      2.width = 250
+      
+      3.label = Time
+      3.name = tstamp
+      3.index = tstamp
+      3.width = 100
+      3.align = right
+      
+      4.label = Created
+      4.name = crdate
+      4.index = crdate
+      4.width = 100
+      4.align = right
+      
+      5.label = Doktype
+      5.name = doktype
+      5.index = doktype
+      5.width = 70
+      5.align = right
+      
+      6.label = Deleted
+      6.name = deleted
+      6.index = deleted
+      6.width = 40
+      6.sortable = false
+      
+    }
+  }
+}
