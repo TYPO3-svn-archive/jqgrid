@@ -81,13 +81,21 @@ class tx_jqgrid_pi1 extends tslib_pibase {
   
   // reply to ajax calls
 	function ajax($content,$conf)	{
-
+    
     $conf   = $conf[$_GET['tskey'].'.'];
     $page   = $_GET['page'];
     $limit  = $_GET['rows'];
     $sidx   = $_GET['sidx'];
     $sord   = $_GET['sord'];
     $table  = $conf['table'];
+    $where  = $conf['table.']['where'];
+    $where  = trim($this->cObj->insertData($where));
+    $group = null;
+    
+    if($_GET['_search']){
+      $where = $this->searchQuery($where,$_GET['searchField'],$_GET['searchOper'],$_GET['searchString']);
+    }
+    
     $fields = array();
     $stdWrap = array();
     foreach($conf['columns.'] as $pos => $column){
@@ -98,7 +106,7 @@ class tx_jqgrid_pi1 extends tslib_pibase {
     
     if(!$sidx) $sidx = 1;
     
-    $data = $GLOBALS['TYPO3_DB']->exec_SELECTgetRows('COUNT(*)',$table,null,null,null,null);
+    $data = $GLOBALS['TYPO3_DB']->exec_SELECTgetRows('COUNT(*)',$table,$where,$group,null,null);
     $count = intval($data[0]['COUNT(*)']);
     
     $total_pages = ( $count > 0 && $limit > 0 )?ceil($count/$limit):0;
@@ -106,8 +114,6 @@ class tx_jqgrid_pi1 extends tslib_pibase {
     $start = $limit*$page - $limit;
     if( $start < 0 ) $start = 0;
      
-    $where = null;
-    $group = null;
     $order = sprintf('%s %s',$sidx,$sord);
     $limit = sprintf('%d,%d',$start,$limit);
     $data = $GLOBALS['TYPO3_DB']->exec_SELECTgetRows($fields,$table,$where,$group,$order,$limit);
@@ -129,6 +135,31 @@ class tx_jqgrid_pi1 extends tslib_pibase {
     return $s;
   }
   
+  private function searchQuery($where,$field,$operator,$string){
+    switch($operator){
+      case "eq": $sql = sprintf("`%s` = '%s'",$field,$string); break; // equal
+      case "ne": $sql = sprintf("`%s` != '%s'",$field,$string); break; // not equal
+      case "lt": $sql = sprintf("`%s` < '%s'",$field,$string); break; // less
+      case "le": $sql = sprintf("`%s` <= '%s'",$field,$string); break; // less or equal
+      case "gt": $sql = sprintf("`%s` > '%s'",$field,$string); break; // greater
+      case "ge": $sql = sprintf("`%s` >= '%s'",$field,$string); break; // greater or equal
+      case "bw": $sql = sprintf("`%s` LIKE '%s%%'",$field,$string); break; // begins with
+      case "bn": $sql = sprintf("`%s` LIKE '%s%%'",$field,$string); break; // does not begin with
+      case "in": $sql = sprintf("`%s` IN(%s)",$field,$string); break; // is in
+      case "ni": $sql = sprintf("`%s` IN(%s)",$field,$string); break; // is not in
+      case "ew": $sql = sprintf("`%s` LIKE '%%%s'",$field,$string); break; // ends with
+      case "en": $sql = sprintf("`%s` LIKE '%%%s'",$field,$string); break; // does not end with
+      case "cn": $sql = sprintf("`%s` LIKE '%%%s%%'",$field,$string); break; // contains
+      case "nc": $sql = sprintf("`%s` LIKE '%%%s%%'",$field,$string); break; // does not contain
+    }
+    if(!empty($sql)){
+      if(!empty($where)) $where .= ' AND ';
+      $where .= $sql;
+    }
+    //var_dump($where);die();
+    return $where;
+  }
+  
   // add js to page
   function getJS(){
   
@@ -140,17 +171,43 @@ class tx_jqgrid_pi1 extends tslib_pibase {
     $conf['mtype'] = 'GET';
     $conf['rowList'] = explode(',',$conf['rowList']);
     
+    $pagerOpts = $conf['pager.'];
+    $pagerOptsEdit   = $pagerOpts['edit.'];
+    $pagerOptsAdd    = $pagerOpts['add.'];
+    $pagerOptsDel    = $pagerOpts['del.'];
+    $pagerOptsSearch = $pagerOpts['search.'];
+    $pagerOptsView   = $pagerOpts['view.'];
+    
     // columns
     foreach($conf['columns.'] as $pos => $field) $conf['colModel'][] = array_diff_key($field,array('stdWrap.'=>0));
     
     // tx_jqgrid_pi1 onlys
     unset($conf['table']);
+    unset($conf['table.']);
     unset($conf['typeNum']);
+    unset($conf['pager.']);
     unset($conf['columns.']);
+    unset($pagerOpts['edit.']);
+    unset($pagerOpts['add.']);
+    unset($pagerOpts['del.']);
+    unset($pagerOpts['search.']);
+    unset($pagerOpts['view.']);
+    
+    $jqGridID = "#jqgrid-".$this->uid."-list";
+    $jqGridParameters = self::array_js($conf,'  ');
+    $navGridParameters = implode(',',array(
+			"'".$conf['pager']."'",
+      self::array_js($pagerOpts       ,'  '),
+      self::array_js($pagerOptsEdit   ,'  '),
+      self::array_js($pagerOptsAdd    ,'  '),
+      self::array_js($pagerOptsDel    ,'  '),
+      self::array_js($pagerOptsSearch ,'  '),
+      self::array_js($pagerOptsView   ,'  '),
+    ));
     
     // transform to js
     $jscode  = "jQuery(document).ready(function(){\n";
-    $jscode .= "  jQuery(\"#jqgrid-".$this->uid."-list\").jqGrid(".self::array_js($conf,'  ').");\n";
+    $jscode .= "  jQuery('".$jqGridID."').jqGrid(".$jqGridParameters.").navGrid(".$navGridParameters.");\n";
     $jscode .= "});\n";
     
     return $jscode;

@@ -13,12 +13,15 @@ tx_jqgrid_pi1 {
   10.userFunc = tx_jqgrid_pi1->ajax
 }
 
+page.includeJS.jqGAutoResize = EXT:jqgrid/res/js/autoresize.js
+
 ### plugin demo configuration ###
 # => http://www.trirand.com/jqgridwiki/doku.php?id=wiki:options
 # => http://www.trirand.com/jqgridwiki/doku.php?id=wiki:colmodel_options
 plugin.tx_jqgrid_pi1{
   pages{
     table = pages
+    table.where = pid = 0
     typeNum = {$plugin.tx_jqgrid_pi1.pagetype}
     rowNum = 10
     rowList = 10,20,30
